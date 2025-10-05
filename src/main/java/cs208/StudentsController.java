@@ -124,6 +124,41 @@ public class StudentsController
      * @throws ResponseStatusException: a 404 status code if the student with id = {id} does not exist
      */
     // TODO: implement this route
+    @PatchMapping(value = "/students/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Student updateStudent(
+            @PathVariable int id,
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String birthDate
+    ) {
+        // Get existing student
+        Student existingStudent = Main.database.getStudentWithId(id);
+        if (existingStudent == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student with id " + id + " not found");
+        }
+
+        // Apply updates (only if provided)
+        if (firstName != null) {
+            existingStudent.setFirstName(firstName);
+        }
+        if (lastName != null) {
+            existingStudent.setLastName(lastName);
+        }
+        if (birthDate != null) {
+            try {
+                existingStudent.setBirthDate(Date.valueOf(birthDate));
+            } catch (IllegalArgumentException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date format. Use yyyy-mm-dd.", e);
+            }
+        }
+
+        try {
+            Main.database.updateExistingStudentInformation(existingStudent);
+            return Main.database.getStudentWithId(id); // return the updated student
+        } catch (SQLException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update student", e);
+        }
+    }
 
 
 

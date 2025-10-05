@@ -342,6 +342,58 @@ public class Database
         return newStudent;
     }
 
+    public void updateExistingStudentInformation(Student studentToUpdate) throws SQLException {
+        // Build dynamic SQL
+        StringBuilder sqlBuilder = new StringBuilder("UPDATE students SET ");
+        List<Object> params = new ArrayList<>();
+
+        if (studentToUpdate.getFirstName() != null) {
+            sqlBuilder.append("first_name = ?, ");
+            params.add(studentToUpdate.getFirstName());
+        }
+        if (studentToUpdate.getLastName() != null) {
+            sqlBuilder.append("last_name = ?, ");
+            params.add(studentToUpdate.getLastName());
+        }
+        if (studentToUpdate.getBirthDate() != null) {
+            sqlBuilder.append("birth_date = ?, ");
+            params.add(studentToUpdate.getBirthDate().toString()); // store as string (YYYY-MM-DD)
+        }
+
+        // Remove trailing comma and space
+        if (params.isEmpty()) {
+            System.out.println("No fields to update for student id = " + studentToUpdate.getId());
+            return;
+        }
+
+        sqlBuilder.setLength(sqlBuilder.length() - 2);
+        sqlBuilder.append(" WHERE id = ?;");
+        params.add(studentToUpdate.getId());
+
+        String sql = sqlBuilder.toString();
+        System.out.println("SQL = " + sql);
+
+        try (
+                Connection connection = getDatabaseConnection();
+                PreparedStatement sqlStatement = connection.prepareStatement(sql);
+        ) {
+            for (int i = 0; i < params.size(); i++) {
+                sqlStatement.setObject(i + 1, params.get(i));
+            }
+
+            int rows = sqlStatement.executeUpdate();
+            if (rows > 0) {
+                System.out.println("SUCCESSFULLY updated student with id = " + studentToUpdate.getId());
+            } else {
+                System.out.println("No student found with id = " + studentToUpdate.getId());
+            }
+        }
+        catch (SQLException sqlException) {
+            System.out.println("!!! SQLException: failed to update student with id = " + studentToUpdate.getId());
+            System.out.println(sqlException.getMessage());
+            throw sqlException;
+        }
+    }
 
 
 
