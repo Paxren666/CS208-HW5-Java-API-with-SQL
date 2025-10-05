@@ -266,9 +266,6 @@ public class Database
 
 
 
-
-
-
     public List<Student> listAllStudents()
     {
         String sql =
@@ -430,10 +427,6 @@ public class Database
 
 
 
-
-
-
-
     public ArrayList<RegisteredStudentJoinResult> listAllRegisteredStudents()
     {
         String sql =
@@ -500,8 +493,29 @@ public class Database
         }
     }
 
+    public void dropStudentFromClass(int studentId, int classId) throws SQLException {
+        String sql = "DELETE FROM registered_students WHERE student_id = ? AND class_id = ?;";
 
+        try (
+                Connection connection = getDatabaseConnection();
+                PreparedStatement sqlStatement = connection.prepareStatement(sql);
+        ) {
+            sqlStatement.setInt(1, studentId);
+            sqlStatement.setInt(2, classId);
 
+            int rowsAffected = sqlStatement.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("SUCCESSFULLY dropped student " + studentId + " from class " + classId);
+            } else {
+                System.out.println("!!! WARNING: No record found for student " + studentId + " in class " + classId);
+            }
+        }
+        catch (SQLException sqlException) {
+            System.out.println("!!! SQLException: failed to delete from the registered_students table");
+            System.out.println(sqlException.getMessage());
+            throw sqlException;
+        }
+    }
 
 
 

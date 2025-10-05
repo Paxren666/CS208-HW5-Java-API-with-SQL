@@ -90,6 +90,35 @@ public class RegisteredStudentsController
      * @throws ResponseStatusException: a 404 status code if the class with id = {classId} does not exist
      */
     // TODO: implement this route
+    @DeleteMapping(value = "/drop_student_from_class")
+    public void dropStudentFromClass(
+            @RequestParam int studentId,
+            @RequestParam int classId)
+    {
+        try {
+            // Check if student exists
+            if (Main.database.getStudentWithId(studentId) == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student with ID " + studentId + " not found");
+            }
+
+            // Check if class exists
+            if (Main.database.getClassWithId(classId) == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Class with ID " + classId + " not found");
+            }
+
+            // Perform deletion
+            Main.database.dropStudentFromClass(studentId, classId);
+
+            // Return 204 No Content (Spring does this automatically if we return void and don’t throw)
+        }
+        catch (SQLException sqlException) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Failed to drop student " + studentId + " from class " + classId + ": " + sqlException.getMessage()
+            );
+        }
+    }
+
 
 
 
