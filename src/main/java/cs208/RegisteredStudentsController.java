@@ -43,6 +43,37 @@ public class RegisteredStudentsController
      * into the registered_students table in the database.
      */
     // TODO: implement this route
+    @PostMapping(value = "/add_student_to_class", produces = MediaType.APPLICATION_JSON_VALUE)
+    public RegisteredStudentJoinResult addStudentToClass(
+            @RequestParam int studentId,
+            @RequestParam int classId)
+    {
+        try {
+            if (Main.database.getStudentWithId(studentId) == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student with ID " + studentId + " not found");
+            }
+
+            if (Main.database.getClassWithId(classId) == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Class with ID " + classId + " not found");
+            }
+
+            Main.database.addStudentToClass(studentId, classId);
+
+            RegisteredStudentJoinResult result = new RegisteredStudentJoinResult(
+                    studentId,
+                    Main.database.getStudentWithId(studentId).getFirstName() + " " +
+                            Main.database.getStudentWithId(studentId).getLastName(),
+                    Main.database.getClassWithId(classId).getCode(),
+                    Main.database.getClassWithId(classId).getTitle()
+            );
+
+            return result;
+        }
+        catch (SQLException sqlException) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Failed to add student " + studentId + " to class " + classId + ": " + sqlException.getMessage());
+        }
+    }
 
 
 

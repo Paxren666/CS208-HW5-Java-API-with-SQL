@@ -475,6 +475,30 @@ public class Database
         return listOfRegisteredStudentJoinResults;
     }
 
+    public void addStudentToClass(int studentId, int classId) throws SQLException {
+        String sql = "INSERT INTO registered_students (student_id, class_id) VALUES (?, ?);";
+
+        try (
+                Connection connection = getDatabaseConnection();
+                PreparedStatement sqlStatement = connection.prepareStatement(sql);
+        ) {
+            sqlStatement.setInt(1, studentId);
+            sqlStatement.setInt(2, classId);
+
+            int rowsAffected = sqlStatement.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("SUCCESSFULLY added student " + studentId + " to class " + classId);
+            } else {
+                System.out.println("!!! WARNING: failed to register student " + studentId + " to class " + classId);
+            }
+        }
+        catch (SQLException sqlException) {
+            System.out.println("!!! SQLException: failed to insert into the registered_students table");
+            System.out.println(sqlException.getMessage());
+            throw sqlException;
+        }
+    }
 
 
 
