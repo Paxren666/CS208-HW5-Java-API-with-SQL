@@ -303,6 +303,45 @@ public class Database
         return listOfStudents;
     }
 
+    public Student addNewStudent(Student newStudent) throws SQLException
+    {
+        String sql =
+                "INSERT INTO students (first_name, last_name, birth_date)\n" +
+                        "VALUES (?, ?, ?);";
+
+        try (
+                Connection connection = getDatabaseConnection();
+                PreparedStatement sqlStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        )
+        {
+            sqlStatement.setString(1, newStudent.getFirstName());
+            sqlStatement.setString(2, newStudent.getLastName());
+            sqlStatement.setString(3, newStudent.getBirthDate().toString());
+
+            int numberOfRowsAffected = sqlStatement.executeUpdate();
+            System.out.println("numberOfRowsAffected = " + numberOfRowsAffected);
+
+            if (numberOfRowsAffected > 0) {
+                ResultSet resultSet = sqlStatement.getGeneratedKeys();
+
+                while (resultSet.next()) {
+                    int generatedId = resultSet.getInt(1); // first generated column
+                    System.out.println("SUCCESSFULLY inserted a new student with id = " + generatedId);
+                    newStudent.setId(generatedId);
+                }
+
+                resultSet.close();
+            }
+        }
+        catch (SQLException sqlException) {
+            System.out.println("!!! SQLException: failed to insert into the students table");
+            System.out.println(sqlException.getMessage());
+            throw sqlException;
+        }
+
+        return newStudent;
+    }
+
 
 
 

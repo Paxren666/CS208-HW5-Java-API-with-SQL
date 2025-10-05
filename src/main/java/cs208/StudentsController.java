@@ -71,6 +71,23 @@ public class StudentsController
      * @return the created student (which was inserted into the database), as JSON
      */
     // TODO: implement this route
+    @PostMapping(value = "/students", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Student createStudent(
+            @RequestParam String firstName,
+            @RequestParam String lastName,
+            @RequestParam String birthDate // format: yyyy-mm-dd
+    ) {
+        try {
+            Student newStudent = new Student(0, firstName, lastName, Date.valueOf(birthDate));
+            return Main.database.addNewStudent(newStudent);
+        }
+        catch (SQLException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create student", e);
+        }
+        catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date format. Use yyyy-mm-dd.", e);
+        }
+    }
 
 
 
