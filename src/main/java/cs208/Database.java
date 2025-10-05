@@ -263,6 +263,12 @@ public class Database
         }
     }
 
+
+
+
+
+
+
     public List<Student> listAllStudents()
     {
         String sql =
@@ -390,6 +396,33 @@ public class Database
         }
         catch (SQLException sqlException) {
             System.out.println("!!! SQLException: failed to update student with id = " + studentToUpdate.getId());
+            System.out.println(sqlException.getMessage());
+            throw sqlException;
+        }
+    }
+
+    public void deleteExistingStudent(int idOfStudentToDelete) throws SQLException {
+        String sql =
+                "DELETE FROM students\n" +
+                        "WHERE id = ?;";
+
+        try (
+                Connection connection = getDatabaseConnection();
+                PreparedStatement sqlStatement = connection.prepareStatement(sql);
+        ) {
+            sqlStatement.setInt(1, idOfStudentToDelete);
+
+            int numberOfRowsAffected = sqlStatement.executeUpdate();
+            System.out.println("numberOfRowsAffected = " + numberOfRowsAffected);
+
+            if (numberOfRowsAffected > 0) {
+                System.out.println("SUCCESSFULLY deleted the student with id = " + idOfStudentToDelete);
+            } else {
+                System.out.println("!!! WARNING: failed to delete the student with id = " + idOfStudentToDelete);
+            }
+        }
+        catch (SQLException sqlException) {
+            System.out.println("!!! SQLException: failed to delete the student with id = " + idOfStudentToDelete);
             System.out.println(sqlException.getMessage());
             throw sqlException;
         }
